@@ -1,5 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Form, Input, Checkbox, Button } from 'antd';
+import { useSelector, useDispatch } from 'react-redux';
+import router from 'next/router';
+
+import { SIGN_UP_REQUEST } from '../reducers/user';
 
 export const useInput = (initValue = null) => {
   const [value, setter] = useState(initValue);
@@ -10,14 +14,23 @@ export const useInput = (initValue = null) => {
 };
 
 const Signup = () => {
+  const [password, setPassword] = useState('');
   const [passwordCheck, setPasswordCheck] = useState('');
   const [term, setTerm] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [termError, setTermError] = useState(false);
 
   const [id, onChangeId] = useInput('');
-  const [nick, onChangeNick] = useInput('');
-  const [password, onChangePassword] = useInput('');
+  const [nickname, onChangeNick] = useInput('');
+
+  const { isSigningUp, isLoggedIn } = useSelector(state => state.user);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.push('/');
+    }
+  }, [isLoggedIn]);
 
   const onSubmit = useCallback(
     e => {
@@ -28,15 +41,24 @@ const Signup = () => {
       if (!term) {
         return setTermError(true);
       }
-      console.log({
-        id,
-        nick,
-        password,
-        passwordCheck,
-        term,
+      dispatch({
+        type: SIGN_UP_REQUEST,
+        data: {
+          id,
+          password,
+          nickname,
+        },
       });
     },
     [password, passwordCheck, term]
+  );
+
+  const onChangePassword = useCallback(
+    e => {
+      setPassword(e.target.value);
+      setPasswordError(e.target.value !== passwordCheck);
+    },
+    [passwordCheck]
   );
   /*
   const onChangeId = e => {
@@ -93,11 +115,11 @@ const Signup = () => {
             <Input name="user-id" value={id} required onChange={onChangeId} />
           </div>
           <div>
-            <label htmlFor="user-nick">닉네임</label>
+            <label htmlFor="user-nickname">닉네임</label>
             <br />
             <Input
-              name="user-nick"
-              value={nick}
+              name="user-nickname"
+              value={nickname}
               required
               onChange={onChangeNick}
             />
@@ -136,7 +158,7 @@ const Signup = () => {
             {termError && <div style={{ color: 'red' }}>인정하세요.</div>}
           </div>
           <div style={{ marginTop: 10 }}>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={isSigningUp}>
               가입하기
             </Button>
           </div>

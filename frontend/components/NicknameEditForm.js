@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Form, Input, Button } from 'antd';
 
 const NicknameEditForm = () => {
+  const [newNickname, setNewNickname] = useState('');
+
+  const onChangeNicknameInput = useCallback(e => {
+    setNewNickname(e.target.value);
+  }, []);
   return (
     <Form
       style={{
@@ -10,8 +15,14 @@ const NicknameEditForm = () => {
         padding: '20px',
       }}
     >
-      <Input addonBefore="닉네임" />
-      <Button type="primary">수정</Button>
+      <Input
+        addonBefore="닉네임"
+        value={newNickname}
+        onChange={onChangeNicknameInput}
+      />
+      <Button type="primary" htmlType="submit">
+        수정
+      </Button>
     </Form>
   );
 };
