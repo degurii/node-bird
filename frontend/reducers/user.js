@@ -36,7 +36,7 @@ export const ADD_POST_TO_ME = 'ADD_POST_TO_ME';
 //export const EDIT_NICKNAME_SUCCESS = 'EDIT_NICKNAME_SUCCESS';
 //export const EDIT_NICKNAME_FAILURE = 'EDIT_NICKNAME_FAILURE';
 
-const userDummy = {
+const dummyUser = {
   id: 'degurii',
   nickname: '데구리',
   Post: [],
@@ -85,7 +85,7 @@ const reducer = (state = initialState, action) => {
         ...state,
         isLoggedIn: true,
         isLoggingIn: false,
-        me: userDummy,
+        me: dummyUser,
       };
     }
     case LOG_IN_FAILURE: {
