@@ -13,9 +13,11 @@ const AppLayout = ({ children }) => {
   // 공통 레이아웃에서 loadUser한다
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch({
-      type: LOAD_USER_REQUEST,
-    });
+    if (!me) {
+      dispatch({
+        type: LOAD_USER_REQUEST,
+      });
+    }
   }, []);
 
   return (

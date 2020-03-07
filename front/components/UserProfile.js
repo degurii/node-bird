@@ -14,7 +14,6 @@ const UserProfile = () => {
   }, []);
   return (
     <Card
-    /*
       actions={[
         <div key="twit">
           짹짹
@@ -32,7 +31,6 @@ const UserProfile = () => {
           {me.Followers.length}
         </div>,
       ]}
-      */
     >
       <Card.Meta
         avatar={<Avatar>{me.nickname[0]}</Avatar>}

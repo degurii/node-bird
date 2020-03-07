@@ -11,6 +11,7 @@ const db = require('./models');
 const userAPIRouter = require('./routes/user');
 const postAPIRouter = require('./routes/post');
 const postsAPIRouter = require('./routes/posts');
+const hashtagAPIRouter = require('./routes/hashtag');
 
 dotenv.config();
 const app = express();
@@ -27,12 +28,12 @@ app.use(
     credentials: true,
   })
 );
-app.use(cookieParser('process.env.COOKIE_SECRET'));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(
   expressSession({
     resave: false, // 매번 세션 강제 저장
     saveUninitialized: false, // 빈 값도 저장
-    secret: 'process.env.COOKIE_SECRET',
+    secret: process.env.COOKIE_SECRET,
     cookie: {
       httpOnly: true, // 자바스크립트에서 쿠키에 접근 못함
       secure: false, // https를 쓸 때 true
@@ -49,6 +50,7 @@ app.use(passport.session());
 app.use('/api/user', userAPIRouter);
 app.use('/api/post', postAPIRouter);
 app.use('/api/posts', postsAPIRouter);
+app.use('/api/hashtag', hashtagAPIRouter);
 
 app.get('/', (req, res) => {
   res.send('<h1>Hello, server</h1>');

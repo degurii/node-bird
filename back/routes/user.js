@@ -1,18 +1,17 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const { isLoggedIn } = require('./middleware');
 const db = require('../models');
 const passport = require('passport');
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  if (!req.user) {
-    return res.status(401).send('로그인이 필요합니다.');
-  }
+router.get('/', isLoggedIn, (req, res) => {
   // 프론트로 유저 정보를 보낼 때 패스워드는 항상 빼고 보내자
   const user = Object.assign({}, req.user.toJSON());
+  //console.log('\n\n\n\nreqreqreqreqreq\n\n\n\n\n', req);
   delete user.password;
-  console.log(user);
+  //console.log(user);
   return res.json(user);
 });
 
@@ -33,7 +32,7 @@ router.post('/', async (req, res, next) => {
       userId: req.body.userId,
       password: hashedPassword,
     });
-    console.log(newUser);
+    //console.log(newUser);
     return res.status(200).json(newUser);
   } catch (e) {
     console.error(e);
@@ -42,7 +41,40 @@ router.post('/', async (req, res, next) => {
     return next(e);
   }
 });
-router.get('/:id', (req, res) => {});
+router.get('/:id', async (req, res, next) => {
+  try {
+    const user = await db.User.findOne({
+      where: { id: parseInt(req.params.id, 10) },
+      include: [
+        {
+          model: db.Post,
+          as: 'Posts',
+          attributes: ['id'],
+        },
+        {
+          model: db.User,
+          as: 'Followings',
+          attributes: ['id'],
+        },
+        {
+          model: db.User,
+          as: 'Followers',
+          attributes: ['id'],
+        },
+      ],
+      attributes: ['id', 'nickname'],
+    });
+    // 누가 팔로잉했는지 등의 id정보를 가리기 위해 수만 넘겨준다
+    const jsonUser = user.toJSON();
+    jsonUser.Posts = jsonUser.Posts ? jsonUser.Posts.length : 0;
+    jsonUser.Followings = jsonUser.Followings ? jsonUser.Followings.length : 0;
+    jsonUser.Followers = jsonUser.Followers ? jsonUser.Followers.length : 0;
+    res.json(jsonUser);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
 router.post('/logout', (req, res) => {
   console.log('logout');
   req.logout();
@@ -86,7 +118,7 @@ router.post('/login', (req, res, next) => {
           ],
           attributes: ['id', 'nickname', 'userId'],
         });
-        console.log(fullUser);
+        //console.log(fullUser);
         return res.json(fullUser);
       } catch (e) {
         next(e);
@@ -97,6 +129,25 @@ router.post('/login', (req, res, next) => {
 router.get('/:id/follow', (req, res) => {});
 router.post('/:id/follow', (req, res) => {});
 router.delete('/:id/follow', (req, res) => {});
-router.get('/:id/posts', (req, res) => {});
+router.get('/:id/posts', async (req, res, next) => {
+  try {
+    const posts = await db.Post.findAll({
+      where: {
+        UserId: parseInt(req.params.id, 10),
+        RetweetId: null,
+      },
+      include: [
+        {
+          model: db.User,
+          attributes: ['id', 'nickname'],
+        },
+      ],
+    });
+    res.json(posts);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
 
 module.exports = router;

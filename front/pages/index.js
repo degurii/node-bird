@@ -34,9 +34,7 @@ const Home = () => {
     <div>
       {me && <PostForm />}
       {me &&
-        mainPosts.map(post => (
-          <PostCard key={post.User.nickname} post={post} />
-        ))}
+        mainPosts.map(post => <PostCard key={post.createdAt} post={post} />)}
     </div>
   );
 };

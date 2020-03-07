@@ -3,7 +3,7 @@ import { Card, Icon, Button, Avatar, Input, List, Form, Comment } from 'antd';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
-import { ADD_COMMENT_REQUEST } from '../reducers/post';
+import { ADD_COMMENT_REQUEST, LOAD_COMMENTS_REQUEST } from '../reducers/post';
 
 const PostCard = ({ post }) => {
   const [commentFormOpened, setCommentFormOpened] = useState(false);
@@ -14,7 +14,13 @@ const PostCard = ({ post }) => {
 
   const onToggleComment = useCallback(() => {
     setCommentFormOpened(prev => !prev);
-  }, []);
+    if (!commentFormOpened) {
+      dispatch({
+        type: LOAD_COMMENTS_REQUEST,
+        data: post.id,
+      });
+    }
+  }, [commentFormOpened]);
 
   const onSubmitComment = useCallback(
     e => {
@@ -26,10 +32,11 @@ const PostCard = ({ post }) => {
         type: ADD_COMMENT_REQUEST,
         data: {
           postId: post.id,
+          content: commentText,
         },
       });
     },
-    [me]
+    [me && me.id, commentText]
   );
   const onChangeCommentText = useCallback(e => {
     setCommentText(e.target.value);
@@ -51,14 +58,36 @@ const PostCard = ({ post }) => {
         extra={<Button>팔로우</Button>}
       >
         <Card.Meta
-          avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
+          avatar={
+            // 다음처럼 하면 주소가 서버 주소이기때문에 새로고침됨
+            // <Link href={`/user/${post.User.id}`}>
+            // 그러니까 아래처럼 하자
+            // <Link href={{ pathname: '/user', query: { id: post.User.id } }}>
+            // 근데 또 이러면 주소가 이상해짐. "~/hashtag?tag=xxx" 이런식으로 뜸
+            // 그러니까 아래처럼 하자
+            <Link
+              href={{ pathname: '/user', query: { id: post.User.id } }}
+              as={`/user/${post.User.id}`}
+            >
+              <a>
+                <Avatar>{post.User.nickname[0]}</Avatar>
+              </a>
+            </Link>
+          }
           title={post.User.nickname}
           description={
             <div>
               {post.content.split(/(#[^\s]+)/g).map(v => {
                 if (v.match(/#[^\s]+/)) {
                   return (
-                    <Link href="/hashtag" key={v}>
+                    <Link
+                      href={{
+                        pathname: '/hashtag',
+                        query: { tag: v.slice(1) },
+                      }}
+                      as={`/hashtag/${v.slice(1)}`}
+                      key={v}
+                    >
                       <a>{v}</a>
                     </Link>
                   );
@@ -91,7 +120,16 @@ const PostCard = ({ post }) => {
               <li>
                 <Comment
                   author={item.User.nickname}
-                  avatar={<Avatar>{item.User.nickname[0]}</Avatar>}
+                  avatar={
+                    <Link
+                      href={{ path: '/user/', query: item.User.id }}
+                      as={`/user/${item.User.id}`}
+                    >
+                      <a>
+                        <Avatar>{item.User.nickname[0]}</Avatar>
+                      </a>
+                    </Link>
+                  }
                   content={item.content}
                   datetime={item.createdAt}
                 />
@@ -109,7 +147,7 @@ PostCard.propTypes = {
     User: PropTypes.object,
     content: PropTypes.string,
     img: PropTypes.string,
-    createdAt: PropTypes.object,
+    createdAt: PropTypes.string,
   }),
 };
 

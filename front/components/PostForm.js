@@ -49,8 +49,17 @@ const PostForm = () => {
         onChange={onChangeText}
       />
       <div>
-        <input type="file" multiple hidden />
-        <Button>이미지 업로드</Button>
+        {
+          // 여기있는 버튼이랑 input엔 이미지 업로드하는 기능을 추가해야함.
+        }
+        <input
+          type="file"
+          multiple
+          hidden
+          ref={imageInput}
+          onChange={onChangeImages}
+        />
+        <Button onClick={onClickImageUpload}>이미지 업로드</Button>
         <Button
           type="primary"
           style={{ float: 'right' }}
