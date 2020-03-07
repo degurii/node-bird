@@ -20,6 +20,9 @@ import {
   LOAD_USER_POSTS_SUCCESS,
   LOAD_USER_POSTS_FAILURE,
   LOAD_USER_POSTS_REQUEST,
+  UPLOAD_IMAGES_REQUEST,
+  UPLOAD_IMAGES_SUCCESS,
+  UPLOAD_IMAGES_FAILURE,
 } from '../reducers/post';
 
 function loadMainPostsAPI() {
@@ -89,16 +92,13 @@ function* watchLoadUserPosts() {
 }
 
 function addPostAPI(postData) {
-  console.log('addPostAPI');
   return axios.post('/post', postData, {
     withCredentials: true,
   });
 }
 function* addPost(action) {
   try {
-    console.log('addPost request');
     const res = yield call(addPostAPI, action.data);
-    console.log('addPostAPI called');
     yield put({
       type: ADD_POST_SUCCESS,
       data: res.data,
@@ -169,6 +169,34 @@ function* loadComments(action) {
 function* watchLoadComments() {
   yield takeLatest(LOAD_COMMENTS_REQUEST, loadComments);
 }
+
+// form 데이터(이미지데이터)를 전송해준다
+// 글 작성중에 이미지를 미리 처리하는 방식이므로 게시물 id를 알 수 없다
+function uploadImagesAPI(formData) {
+  return axios.post(`/post/images`, formData, {
+    withCredentials: true,
+  });
+}
+function* uploadImages(action) {
+  try {
+    const res = yield call(uploadImagesAPI, action.data);
+    yield put({
+      type: UPLOAD_IMAGES_SUCCESS,
+      // 이미지 업로드가 완료되면 서버는 그 이미지가 어디에 저장됐는지 주소를 보내줌
+      // 그 주소를 이용해 미리보기도 할 수 있고, 실제 글 올릴때 같이 업로드 하면됨
+      data: res.data,
+    });
+  } catch (e) {
+    console.log(e);
+    yield put({
+      type: UPLOAD_IMAGES_FAILURE,
+      error: e,
+    });
+  }
+}
+function* watchUploadImages() {
+  yield takeLatest(UPLOAD_IMAGES_REQUEST, uploadImages);
+}
 export default function* postSaga() {
   yield all([
     fork(watchLoadMainPosts),
@@ -177,5 +205,6 @@ export default function* postSaga() {
     fork(watchLoadComments),
     fork(watchLoadHashtagPosts),
     fork(watchLoadUserPosts),
+    fork(watchUploadImages),
   ]);
 }

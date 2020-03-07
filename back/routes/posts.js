@@ -11,6 +11,9 @@ router.get('/', async (req, res) => {
           model: db.User,
           attributes: ['id', 'nickname'],
         },
+        {
+          model: db.Image,
+        },
       ],
       order: [['createdAt', 'DESC']], // 내림차순 정렬
     });

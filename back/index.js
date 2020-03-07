@@ -19,6 +19,8 @@ db.sequelize.sync();
 passportConfig();
 
 app.use(morgan('dev'));
+// upload 디렉토리를 루트폴더처럼 쓸 수 있게 해주겠다
+app.use('/', express.static('uploads'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
