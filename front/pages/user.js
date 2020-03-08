@@ -50,7 +50,7 @@ const User = ({ id }) => {
         </Card>
       ) : null}
       {mainPosts.map(post => (
-        <PostCard key={+post.createdAt} post={post} />
+        <PostCard key={post.createdAt} post={post} />
       ))}
     </div>
   );

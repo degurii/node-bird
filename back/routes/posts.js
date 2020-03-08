@@ -14,6 +14,25 @@ router.get('/', async (req, res) => {
         {
           model: db.Image,
         },
+        {
+          model: db.User,
+          through: 'Like',
+          as: 'Likers',
+          attributes: ['id'],
+        },
+        {
+          model: db.Post,
+          as: 'Retweet',
+          include: [
+            {
+              model: db.User,
+              attributes: ['id', 'nickname'],
+            },
+            {
+              model: db.Image,
+            },
+          ],
+        },
       ],
       order: [['createdAt', 'DESC']], // 내림차순 정렬
     });

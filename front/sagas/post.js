@@ -1,4 +1,12 @@
-import { all, takeLatest, fork, put, delay, call } from 'redux-saga/effects';
+import {
+  all,
+  takeLatest,
+  takeEvery,
+  fork,
+  put,
+  delay,
+  call,
+} from 'redux-saga/effects';
 import axios from 'axios';
 
 import {
@@ -23,7 +31,17 @@ import {
   UPLOAD_IMAGES_REQUEST,
   UPLOAD_IMAGES_SUCCESS,
   UPLOAD_IMAGES_FAILURE,
+  LIKE_POST_REQUEST,
+  LIKE_POST_SUCCESS,
+  LIKE_POST_FAILURE,
+  UNLIKE_POST_REQUEST,
+  UNLIKE_POST_SUCCESS,
+  UNLIKE_POST_FAILURE,
+  RETWEET_REQUEST,
+  RETWEET_SUCCESS,
+  RETWEET_FAILURE,
 } from '../reducers/post';
+import { ADD_POST_TO_ME } from '../reducers/user';
 
 function loadMainPostsAPI() {
   return axios.get('/posts');
@@ -99,9 +117,15 @@ function addPostAPI(postData) {
 function* addPost(action) {
   try {
     const res = yield call(addPostAPI, action.data);
+    // post reducer의 데이터를 수정
     yield put({
       type: ADD_POST_SUCCESS,
       data: res.data,
+    });
+    // user reducer의 데이터를 수정
+    yield put({
+      type: ADD_POST_TO_ME,
+      data: res.data.id,
     });
   } catch (e) {
     yield put({
@@ -194,9 +218,98 @@ function* uploadImages(action) {
     });
   }
 }
+
 function* watchUploadImages() {
   yield takeLatest(UPLOAD_IMAGES_REQUEST, uploadImages);
 }
+
+function likePostAPI(postId) {
+  return axios.post(
+    `/post/${postId}/like`,
+    {},
+    {
+      withCredentials: true,
+    }
+  );
+}
+function* likePost(action) {
+  try {
+    const res = yield call(likePostAPI, action.data);
+    yield put({
+      type: LIKE_POST_SUCCESS,
+      data: {
+        postId: action.data,
+        userId: res.data.userId,
+      },
+    });
+  } catch (e) {
+    console.log(e);
+    yield put({
+      type: LIKE_POST_FAILURE,
+      error: e,
+    });
+  }
+}
+function* watchLikePost() {
+  yield takeEvery(LIKE_POST_REQUEST, likePost);
+}
+
+function unlikePostAPI(postId) {
+  return axios.delete(`/post/${postId}/like`, {
+    withCredentials: true,
+  });
+}
+function* unlikePost(action) {
+  try {
+    const res = yield call(unlikePostAPI, action.data);
+    yield put({
+      type: UNLIKE_POST_SUCCESS,
+      data: {
+        postId: action.data,
+        userId: res.data.userId,
+      },
+    });
+  } catch (e) {
+    console.log(e);
+    yield put({
+      type: UNLIKE_POST_FAILURE,
+      error: e,
+    });
+  }
+}
+function* watchUnlikePost() {
+  yield takeEvery(UNLIKE_POST_REQUEST, unlikePost);
+}
+
+function retweetAPI(postId) {
+  return axios.post(
+    `/post/${postId}/retweet`,
+    {},
+    {
+      withCredentials: true,
+    }
+  );
+}
+function* retweet(action) {
+  try {
+    const res = yield call(retweetAPI, action.data);
+    yield put({
+      type: RETWEET_SUCCESS,
+      data: res.data,
+    });
+  } catch (e) {
+    console.log(e);
+    yield put({
+      type: RETWEET_FAILURE,
+      error: e,
+    });
+    alert(e && e.response.data);
+  }
+}
+function* watchRetweet() {
+  yield takeEvery(RETWEET_REQUEST, retweet);
+}
+
 export default function* postSaga() {
   yield all([
     fork(watchLoadMainPosts),
@@ -206,5 +319,8 @@ export default function* postSaga() {
     fork(watchLoadHashtagPosts),
     fork(watchLoadUserPosts),
     fork(watchUploadImages),
+    fork(watchLikePost),
+    fork(watchUnlikePost),
+    fork(watchRetweet),
   ]);
 }
