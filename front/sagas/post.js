@@ -40,8 +40,11 @@ import {
   RETWEET_REQUEST,
   RETWEET_SUCCESS,
   RETWEET_FAILURE,
+  REMOVE_POST_REQUEST,
+  REMOVE_POST_SUCCESS,
+  REMOVE_POST_FAILURE,
 } from '../reducers/post';
-import { ADD_POST_TO_ME } from '../reducers/user';
+import { ADD_POST_TO_ME, REMOVE_POST_OF_ME } from '../reducers/user';
 
 function loadMainPostsAPI() {
   return axios.get('/posts');
@@ -66,7 +69,9 @@ function* watchLoadMainPosts() {
 }
 
 function loadHashtagPostsAPI(tag) {
-  return axios.get(`/hashtag/${tag}`);
+  // 요청 주소에 한글이 들어가면 안된다
+  // 그러니까 encodeURIComponent()로 감싸준다
+  return axios.get(`/hashtag/${encodeURIComponent(tag)}`);
 }
 function* loadHashtagPosts(action) {
   try {
@@ -88,7 +93,7 @@ function* watchLoadHashtagPosts() {
 }
 
 function loadUserPostsAPI(id) {
-  return axios.get(`/user/${id}/posts`);
+  return axios.get(`/user/${id || 0}/posts`);
 }
 function* loadUserPosts(action) {
   try {
@@ -310,6 +315,34 @@ function* watchRetweet() {
   yield takeEvery(RETWEET_REQUEST, retweet);
 }
 
+function removePostAPI(postId) {
+  return axios.delete(`/post/${postId}`, {
+    withCredentials: true,
+  });
+}
+function* removePost(action) {
+  try {
+    const res = yield call(removePostAPI, action.data);
+    yield put({
+      type: REMOVE_POST_SUCCESS,
+      data: res.data,
+    });
+    yield put({
+      type: REMOVE_POST_OF_ME,
+      data: res.data,
+    });
+  } catch (e) {
+    console.log(e);
+    yield put({
+      type: REMOVE_POST_FAILURE,
+      error: e,
+    });
+  }
+}
+function* watchRemovePost() {
+  yield takeLatest(REMOVE_POST_REQUEST, removePost);
+}
+
 export default function* postSaga() {
   yield all([
     fork(watchLoadMainPosts),
@@ -322,5 +355,6 @@ export default function* postSaga() {
     fork(watchLikePost),
     fork(watchUnlikePost),
     fork(watchRetweet),
+    fork(watchRemovePost),
   ]);
 }

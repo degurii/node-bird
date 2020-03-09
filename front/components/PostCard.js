@@ -19,6 +19,7 @@ import {
   UNLIKE_POST_REQUEST,
   LIKE_POST_REQUEST,
   RETWEET_REQUEST,
+  REMOVE_POST_REQUEST,
 } from '../reducers/post';
 import PostImages from './PostImages';
 import PostCardContent from './PostCardContent';
@@ -115,6 +116,12 @@ const PostCard = ({ post }) => {
     []
   );
 
+  const onRemovePost = useCallback(userId => e => {
+    dispatch({
+      type: REMOVE_POST_REQUEST,
+      data: userId,
+    });
+  });
   return (
     <div>
       <Card
@@ -140,7 +147,9 @@ const PostCard = ({ post }) => {
                 {me && post.UserId === me.id ? (
                   <>
                     <Button>수정</Button>
-                    <Button type="danger">삭제</Button>
+                    <Button type="danger" onClick={onRemovePost(post.id)}>
+                      삭제
+                    </Button>
                   </>
                 ) : (
                   <Button>신고</Button>

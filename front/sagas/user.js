@@ -201,14 +201,17 @@ function* watchUnfollowUser() {
   yield takeEvery(UNFOLLOW_USER_REQUEST, unfollowUser);
 }
 
-function loadFollwersAPI(userId) {
-  return axios.get(`/user/${userId}/followers`, {
-    withCredentials: true,
-  });
+function loadFollwersAPI(userId, offset = 0, limit = 3) {
+  return axios.get(
+    `/user/${userId || 0}/followers?offset=${offset}&limit=${limit}`,
+    {
+      withCredentials: true,
+    }
+  );
 }
 function* loadFollowers(action) {
   try {
-    const res = yield call(loadFollwersAPI, action.data);
+    const res = yield call(loadFollwersAPI, action.data, action.offset);
     yield put({
       type: LOAD_FOLLOWERS_SUCCESS,
       data: res.data,
@@ -225,14 +228,18 @@ function* watchLoadFollowers() {
   yield takeEvery(LOAD_FOLLOWERS_REQUEST, loadFollowers);
 }
 
-function loadFollwingsAPI(userId) {
-  return axios.get(`/user/${userId}/followings`, {
-    withCredentials: true,
-  });
+function loadFollwingsAPI(userId, offset = 0, limit = 3) {
+  // offset을 query string으로 보내준다
+  return axios.get(
+    `/user/${userId || 0}/followings?offset=${offset}&limit=${limit}`,
+    {
+      withCredentials: true,
+    }
+  );
 }
 function* loadFollwings(action) {
   try {
-    const res = yield call(loadFollwingsAPI, action.data);
+    const res = yield call(loadFollwingsAPI, action.data, action.offset);
     yield put({
       type: LOAD_FOLLOWINGS_SUCCESS,
       data: res.data,

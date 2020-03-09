@@ -227,6 +227,18 @@ const reducer = (state = initialState, action) => {
     case RETWEET_FAILURE: {
       return state;
     }
+    case REMOVE_POST_REQUEST: {
+      return state;
+    }
+    case REMOVE_POST_SUCCESS: {
+      return {
+        ...state,
+        mainPosts: state.mainPosts.filter(v => v.id !== action.data),
+      };
+    }
+    case REMOVE_POST_FAILURE: {
+      return state;
+    }
     case REMOVE_IMAGE: {
       return {
         ...state,

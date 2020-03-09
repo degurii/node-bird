@@ -35,6 +35,7 @@ export const REMOVE_FOLLOWER_SUCCESS = 'REMOVE_FOLLOWER_SUCCESS';
 export const REMOVE_FOLLOWER_FAILURE = 'REMOVE_FOLLOWER_FAILURE';
 
 export const ADD_POST_TO_ME = 'ADD_POST_TO_ME';
+export const REMOVE_POST_OF_ME = 'REMOVE_POST_OF_ME';
 
 export const EDIT_NICKNAME_REQUEST = 'EDIT_NICKNAME_REQUEST';
 export const EDIT_NICKNAME_SUCCESS = 'EDIT_NICKNAME_SUCCESS';
@@ -57,6 +58,9 @@ export const initialState = {
   followingList: [], // 팔로잉 리스트
   followerList: [], // 팔로워 리스트
   userInfo: null, // 남의 정보
+
+  hasMoreFollowers: false,
+  hasMoreFollowings: false,
 };
 
 const reducer = (state = initialState, action) => {
@@ -191,15 +195,27 @@ const reducer = (state = initialState, action) => {
         },
       };
     }
+    case REMOVE_POST_OF_ME: {
+      return {
+        ...state,
+        me: {
+          ...state.me,
+          Posts: state.me.Posts.filter(v => v.id !== action.data),
+        },
+      };
+    }
     case LOAD_FOLLOWERS_REQUEST: {
       return {
         ...state,
+        // 처음 데이터를 가져올 때는 더보기 버튼을 true로
+        hasMoreFollowers: action.offset ? state.hasMoreFollowers : true,
       };
     }
     case LOAD_FOLLOWERS_SUCCESS: {
       return {
         ...state,
-        followerList: action.data,
+        followerList: state.followerList.concat(action.data),
+        hasMoreFollowers: action.data.length === 3,
       };
     }
     case LOAD_FOLLOWERS_FAILURE: {
@@ -210,12 +226,14 @@ const reducer = (state = initialState, action) => {
     case LOAD_FOLLOWINGS_REQUEST: {
       return {
         ...state,
+        hasMoreFollowings: action.offset ? state.hasMoreFollowers : true,
       };
     }
     case LOAD_FOLLOWINGS_SUCCESS: {
       return {
         ...state,
-        followingList: action.data,
+        followingList: state.followingList.concat(action.data),
+        hasMoreFollowings: action.data.length === 3,
       };
     }
     case LOAD_FOLLOWINGS_FAILURE: {

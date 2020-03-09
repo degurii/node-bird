@@ -12,13 +12,6 @@ const AppLayout = ({ children }) => {
   // 사용자가 어느 페이지로 접속할 지 모르기 때문에
   // 공통 레이아웃에서 loadUser한다
   const dispatch = useDispatch();
-  useEffect(() => {
-    if (!me) {
-      dispatch({
-        type: LOAD_USER_REQUEST,
-      });
-    }
-  }, []);
 
   return (
     <div>

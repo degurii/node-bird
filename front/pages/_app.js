@@ -3,13 +3,17 @@ import Head from 'next/head';
 import PropTypes from 'prop-types';
 // next와 redux를 함께 쓸 때 필요함
 import withRedux from 'next-redux-wrapper';
+// withReduxSaga는 next와 reduxsaga를 함꼐 쓸때 필요, SSR할때 필수
+import withReduxSaga from 'next-redux-saga';
 import { createStore, compose, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
+import axios from 'axios';
 
 import AppLayout from '../components/AppLayout';
 import reducer from '../reducers';
 import rootSaga from '../sagas';
+import { LOAD_USER_REQUEST } from '../reducers/user';
 
 const NodeBird = ({ Component, store, pageProps }) => {
   return (
@@ -52,9 +56,30 @@ NodeBird.propTypes = {
 // 그 context 안에 component나 ctx가 들어있음
 // component는 페이지들
 NodeBird.getInitialProps = async context => {
-  console.log('context: ', context);
+  //console.log('context: ', context);
   const { ctx, Component } = context;
   let pageProps = {};
+
+  // 아래 부분 순서도 상관있음
+  // 리덕스 사가 호출 순서대로 맞춰서 작성하자
+  const state = ctx.store.getState();
+  // 서버 사이드 렌더링의 경우
+  // 클라이언트(브라우저) -> 백엔드로 요청이 아닌
+  // 프론트 서버 -> 백엔드 서버로 요청하기 때문에
+  // 쿠키를 우리가 따로 설정해서 넣어줘야함
+  // 아래 ctx.req는 서버 환경에서만 존재함, 그러니까 클라환경/서버환경 구분해주자
+  axios.defaults.headers.Cookie = '';
+  const cookie = ctx.isServer ? ctx.req.headers.cookie : '';
+  // 서버환경이고, 쿠키도 있으면 axios에 쿠키를 심어주자
+  if (ctx.isServer && cookie) {
+    axios.defaults.headers.Cookie = cookie;
+  }
+  if (!state.user.me) {
+    ctx.store.dispatch({
+      type: LOAD_USER_REQUEST,
+    });
+  }
+
   if (Component.getInitialProps) {
     pageProps = await Component.getInitialProps(ctx);
   }
@@ -64,6 +89,13 @@ NodeBird.getInitialProps = async context => {
 // 이 코드는 사실상 통째로 외워라 middlewares부분만 바뀐다
 const configureStore = (initialState, options) => {
   const sagaMiddleware = createSagaMiddleware();
+
+  // 다음처럼 커스텀 미들웨어도 만들 수 있다
+  // store => next => action => {} 꼴의 3단 currying 함수를 만들면 됨
+  const logActionMiddleware = store => next => action => {
+    console.log(action);
+    next(action);
+  };
   const middlewares = [sagaMiddleware];
 
   // 배포시 redux 크롬 익스텐션 적용 부분을 빼줘야 함
@@ -80,9 +112,14 @@ const configureStore = (initialState, options) => {
             : f => f
         );
   const store = createStore(reducer, initialState, enhancer);
-  sagaMiddleware.run(rootSaga);
+  // withReduxSaga 사용시 아래처럼 해줘야함
+  store.sagaTask = sagaMiddleware.run(rootSaga);
+
+  // withRedux만 사용시 위처럼 안하고 아래처럼만 해주면 됨
+  // sagaMiddleware.run(rootSaga);
 
   return store;
 };
 
-export default withRedux(configureStore)(NodeBird);
+// withRedux, withReduxSaga를 함께 적용
+export default withRedux(configureStore)(withReduxSaga(NodeBird));

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Form, Input, Checkbox, Button } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
-import router from 'next/router';
+import Router from 'next/router';
 
 import { SIGN_UP_REQUEST } from '../reducers/user';
 
@@ -23,14 +23,8 @@ const Signup = () => {
   const [id, onChangeId] = useInput('');
   const [nickname, onChangeNick] = useInput('');
 
-  const { isSigningUp, isLoggedIn } = useSelector(state => state.user);
+  const { isSigningUp, me } = useSelector(state => state.user);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      router.push('/');
-    }
-  }, [isLoggedIn]);
 
   const onSubmit = useCallback(
     e => {
@@ -60,17 +54,7 @@ const Signup = () => {
     },
     [passwordCheck]
   );
-  /*
-  const onChangeId = e => {
-    setId(e.target.value);
-  };
-  const onChangeNick = e => {
-    setNick(e.target.value);
-  };
-  const onChangePassword = e => {
-    setPassword(e.target.value);
-  };
-  */
+
   const onChangePasswordCheck = useCallback(
     e => {
       setPasswordError(e.target.value !== password);
@@ -84,6 +68,14 @@ const Signup = () => {
     setTerm(e.target.checked);
   }, []);
 
+  useEffect(() => {
+    if (me) {
+      Router.push('/');
+    }
+  }, [me && me.id]);
+  if (me) {
+    return null;
+  }
   return (
     <>
       <Form

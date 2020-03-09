@@ -3,7 +3,7 @@ const multer = require('multer');
 const path = require('path');
 
 const db = require('../models');
-const { isLoggedIn } = require('./middleware');
+const { isLoggedIn, existPost } = require('./middleware');
 
 const router = express.Router();
 
@@ -106,12 +106,17 @@ router.post('/images', upload.array('image'), (req, res, next) => {
   res.json(req.files.map(v => v.filename));
 });
 
-router.get('/:id/comments', async (req, res, next) => {
+router.delete('/:id', isLoggedIn, existPost, async (req, res, next) => {
   try {
-    const post = await db.Post.findOne({ where: { id: req.params.id } });
-    if (!post) {
-      return res.status(404).send('포스트가 존재하지 않습니다.');
-    }
+    await db.Post.destroy({ where: { id: req.params.id } });
+    res.send(req.params.id);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+router.get('/:id/comments', existPost, async (req, res, next) => {
+  try {
     const comments = await db.Comment.findAll({
       where: {
         PostId: req.params.id,
@@ -130,13 +135,16 @@ router.get('/:id/comments', async (req, res, next) => {
     next(e);
   }
 });
-router.post('/:id/comment', isLoggedIn, async (req, res, next) => {
+router.post('/:id/comment', isLoggedIn, existPost, async (req, res, next) => {
   // POST /api/post/3/commnet
   try {
+    /*
     const post = await db.Post.findOne({ where: { id: req.params.id } });
     if (!post) {
       return res.status(404).send('포스트가 존재하지 않습니다.');
     }
+    */
+    const post = req.post;
     const newComment = await db.Comment.create({
       PostId: post.id,
       UserId: req.user.id,
@@ -160,13 +168,9 @@ router.post('/:id/comment', isLoggedIn, async (req, res, next) => {
     next(e);
   }
 });
-router.post('/:id/like', isLoggedIn, async (req, res, next) => {
+router.post('/:id/like', isLoggedIn, existPost, async (req, res, next) => {
   try {
-    // 항상 게시글이 있는지 먼저 확인해야 함
-    const post = await db.Post.findOne({ where: { id: req.params.id } });
-    if (!post) {
-      return res.status(404).send('포스트가 존재하지 않습니다.');
-    }
+    const post = req.post;
     await post.addLiker(req.user.id);
     res.json({ userId: req.user.id });
   } catch (e) {

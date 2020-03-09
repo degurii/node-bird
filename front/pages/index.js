@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 
 import PostForm from '../components/PostForm';
 import PostCard from '../components/PostCard';
@@ -21,22 +21,25 @@ const Home = () => {
   // 위처럼 쓰면 되긴 하는데, 리렌더링이 자주 발생할 수 있으므로 적절한 선에서 아래처럼 쪼개어 불러온다.
   const { me } = useSelector(state => state.user);
   const { mainPosts } = useSelector(state => state.post);
-  const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch({
-      type: LOAD_MAIN_POSTS_REQUEST,
-    });
-  }, []);
-
-  useEffect(() => {}, []);
   return (
     <div>
       {me && <PostForm />}
-      {me &&
-        mainPosts.map(post => <PostCard key={post.createdAt} post={post} />)}
+      {mainPosts.map(post => (
+        <PostCard key={post.createdAt} post={post} />
+      ))}
     </div>
   );
+};
+
+Home.getInitialProps = async context => {
+  // console.log(Object.keys(context));
+  // 위 콘솔 로그를 실행하면 context 내용물이 보이는데,
+  // store에 dispatch, getState가 있다. getState는 리덕스 state를 불러오는 함수
+  console.log(context.store);
+  context.store.dispatch({
+    type: LOAD_MAIN_POSTS_REQUEST,
+  });
 };
 
 export default Home;
