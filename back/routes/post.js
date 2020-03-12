@@ -106,6 +106,17 @@ router.post('/images', upload.array('image'), (req, res, next) => {
   res.json(req.files.map(v => v.filename));
 });
 
+router.get('/:id', existPost, async (req, res, next) => {
+  try {
+    const post = req.post;
+    console.log(post);
+    res.json(post);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+
 router.delete('/:id', isLoggedIn, existPost, async (req, res, next) => {
   try {
     await db.Post.destroy({ where: { id: req.params.id } });
@@ -178,13 +189,10 @@ router.post('/:id/like', isLoggedIn, existPost, async (req, res, next) => {
     next(e);
   }
 });
-router.delete('/:id/like', isLoggedIn, async (req, res, next) => {
+router.delete('/:id/like', isLoggedIn, existPost, async (req, res, next) => {
   try {
     // 항상 게시글이 있는지 먼저 확인해야 함
-    const post = await db.Post.findOne({ where: { id: req.params.id } });
-    if (!post) {
-      return res.status(404).send('포스트가 존재하지 않습니다.');
-    }
+    const post = req.post;
     await post.removeLiker(req.user.id);
     res.json({ userId: req.user.id });
   } catch (e) {

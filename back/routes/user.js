@@ -204,12 +204,19 @@ router.delete('/:id/follow', isLoggedIn, async (req, res, next) => {
 });
 router.get('/:id/posts', async (req, res, next) => {
   try {
+    const lastId = parseInt(req.query.lastId, 10);
+    const where = {
+      // 만약 parseInt 값이 0이면(혹은 null) 내 아이디에 대한 글을 반환
+      UserId: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0,
+      RetweetId: null,
+    };
+    if (lastId) {
+      where.id = {
+        [db.Sequelize.Op.lt]: lastId,
+      };
+    }
     const posts = await db.Post.findAll({
-      where: {
-        // 만약 parseInt 값이 0이면(혹은 null) 내 아이디에 대한 글을 반환
-        UserId: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0,
-        RetweetId: null,
-      },
+      where,
       include: [
         {
           model: db.User,

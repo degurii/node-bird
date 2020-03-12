@@ -56,6 +56,7 @@ User.getInitialProps = async context => {
   // 그러니까 SSR을 위해 여기서 redux action을 dispatch해주면 된다
   const id = parseInt(context.query.id, 10);
   console.log('user getInitialProps', id);
+  const state = context.store.getState();
   context.store.dispatch({
     type: LOAD_USER_REQUEST,
     data: id,

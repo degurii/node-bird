@@ -2,9 +2,9 @@ import {
   all,
   takeLatest,
   takeEvery,
+  throttle,
   fork,
   put,
-  delay,
   call,
 } from 'redux-saga/effects';
 import axios from 'axios';
@@ -43,21 +43,24 @@ import {
   REMOVE_POST_REQUEST,
   REMOVE_POST_SUCCESS,
   REMOVE_POST_FAILURE,
+  LOAD_POST_REQUEST,
+  LOAD_POST_FAILURE,
+  LOAD_POST_SUCCESS,
 } from '../reducers/post';
 import { ADD_POST_TO_ME, REMOVE_POST_OF_ME } from '../reducers/user';
 
-function loadMainPostsAPI() {
-  return axios.get('/posts');
+function loadMainPostsAPI(lastId = 0, limit = 10) {
+  return axios.get(`/posts?lastId=${lastId}&limit=${limit}`);
 }
-function* loadMainPosts() {
+function* loadMainPosts(action) {
   try {
-    const res = yield call(loadMainPostsAPI);
+    const res = yield call(loadMainPostsAPI, action.lastId);
     yield put({
       type: LOAD_MAIN_POSTS_SUCCESS,
       data: res.data,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     yield put({
       type: LOAD_MAIN_POSTS_FAILURE,
       error: e,
@@ -65,23 +68,26 @@ function* loadMainPosts() {
   }
 }
 function* watchLoadMainPosts() {
-  yield takeLatest(LOAD_MAIN_POSTS_REQUEST, loadMainPosts);
+  // throttle 사용 시 한 번 호출되면 지정한 시간만큼은 더이상 호출하지 않는다
+  yield throttle(2000, LOAD_MAIN_POSTS_REQUEST, loadMainPosts);
 }
 
-function loadHashtagPostsAPI(tag) {
+function loadHashtagPostsAPI(tag, lastId = 0, limit = 10) {
   // 요청 주소에 한글이 들어가면 안된다
   // 그러니까 encodeURIComponent()로 감싸준다
-  return axios.get(`/hashtag/${encodeURIComponent(tag)}`);
+  return axios.get(
+    `/hashtag/${encodeURIComponent(tag)}?lastId=${lastId}&limit=${limit}`
+  );
 }
 function* loadHashtagPosts(action) {
   try {
-    const res = yield call(loadHashtagPostsAPI, action.data);
+    const res = yield call(loadHashtagPostsAPI, action.data, action.lastId);
     yield put({
       type: LOAD_HASHTAG_POSTS_SUCCESS,
       data: res.data,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     yield put({
       type: LOAD_HASHTAG_POSTS_FAILURE,
       error: e,
@@ -89,21 +95,21 @@ function* loadHashtagPosts(action) {
   }
 }
 function* watchLoadHashtagPosts() {
-  yield takeLatest(LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
+  yield throttle(2000, LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
 }
 
-function loadUserPostsAPI(id) {
-  return axios.get(`/user/${id || 0}/posts`);
+function loadUserPostsAPI(id, lastId = 0, limit = 10) {
+  return axios.get(`/user/${id || 0}/posts?lastId=${lastId}&limit=${limit}`);
 }
 function* loadUserPosts(action) {
   try {
-    const res = yield call(loadUserPostsAPI, action.data);
+    const res = yield call(loadUserPostsAPI, action.data, action.lastId);
     yield put({
       type: LOAD_USER_POSTS_SUCCESS,
       data: res.data,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     yield put({
       type: LOAD_USER_POSTS_FAILURE,
       error: e,
@@ -163,7 +169,7 @@ function* addComment(action) {
       },
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     yield put({
       type: ADD_COMMENT_FAILURE,
       error: e,
@@ -188,7 +194,7 @@ function* loadComments(action) {
       },
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     yield put({
       type: LOAD_COMMENTS_FAILURE,
       error: e,
@@ -216,7 +222,7 @@ function* uploadImages(action) {
       data: res.data,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     yield put({
       type: UPLOAD_IMAGES_FAILURE,
       error: e,
@@ -248,7 +254,7 @@ function* likePost(action) {
       },
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     yield put({
       type: LIKE_POST_FAILURE,
       error: e,
@@ -275,7 +281,7 @@ function* unlikePost(action) {
       },
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     yield put({
       type: UNLIKE_POST_FAILURE,
       error: e,
@@ -303,7 +309,7 @@ function* retweet(action) {
       data: res.data,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     yield put({
       type: RETWEET_FAILURE,
       error: e,
@@ -332,7 +338,7 @@ function* removePost(action) {
       data: res.data,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     yield put({
       type: REMOVE_POST_FAILURE,
       error: e,
@@ -341,6 +347,28 @@ function* removePost(action) {
 }
 function* watchRemovePost() {
   yield takeLatest(REMOVE_POST_REQUEST, removePost);
+}
+
+function loadPostAPI(postId) {
+  return axios.get(`/post/${postId}`);
+}
+function* loadPost(action) {
+  try {
+    const res = yield call(loadPostAPI, action.data);
+    yield put({
+      type: LOAD_POST_SUCCESS,
+      data: res.data,
+    });
+  } catch (e) {
+    console.error(e);
+    yield put({
+      type: LOAD_POST_FAILURE,
+      error: e,
+    });
+  }
+}
+function* watchLoadPost() {
+  yield takeLatest(LOAD_POST_REQUEST, loadPost);
 }
 
 export default function* postSaga() {
@@ -356,5 +384,6 @@ export default function* postSaga() {
     fork(watchUnlikePost),
     fork(watchRetweet),
     fork(watchRemovePost),
+    fork(watchLoadPost),
   ]);
 }

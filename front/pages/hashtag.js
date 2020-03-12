@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -6,8 +6,35 @@ import { LOAD_HASHTAG_POSTS_REQUEST } from '../reducers/post';
 import PostCard from '../components/PostCard';
 
 const Hashtag = ({ tag }) => {
-  const { mainPosts } = useSelector(state => state.post);
+  const { mainPosts, hasMorePost } = useSelector(state => state.post);
+  const dispatch = useDispatch();
+  const lastIdList = useRef([]);
 
+  const onScroll = useCallback(() => {
+    if (
+      window.scrollY + document.documentElement.clientHeight >
+      document.documentElement.scrollHeight - 300
+    ) {
+      if (hasMorePost) {
+        const lastId = mainPosts.length && mainPosts[mainPosts.length - 1].id;
+        if (!lastIdList.current.includes(lastId)) {
+          dispatch({
+            type: LOAD_HASHTAG_POSTS_REQUEST,
+            data: tag,
+            lastId,
+          });
+        }
+        lastIdList.current.push(lastId);
+      }
+    }
+  }, [hasMorePost, mainPosts, tag]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [hasMorePost, mainPosts, tag]);
   return (
     <div>
       {mainPosts && mainPosts.map(c => <PostCard key={c.createdAt} post={c} />)}
@@ -24,7 +51,8 @@ Hashtag.propTypes = {
 // 그래서 안에 서버쪽 코드를 넣어주면 됨
 Hashtag.getInitialProps = async context => {
   const tag = context.query.tag;
-  console.log('hashtag getInitialProps', tag);
+  //console.log('hashtag getInitialProps', tag);
+  console.log('hashtag - 겟 이니셜 프롭쓰 dispatch 실행');
   context.store.dispatch({
     type: LOAD_HASHTAG_POSTS_REQUEST,
     data: tag,
