@@ -1,4 +1,4 @@
-import produce from 'immer';
+import produce, { finishDraft } from 'immer';
 
 export const ADD_POST_REQUEST = 'ADD_POST_REQUEST';
 export const ADD_POST_SUCCESS = 'ADD_POST_SUCCESS';
@@ -91,10 +91,14 @@ const reducer = (state = initialState, action) => {
       case LOAD_MAIN_POSTS_REQUEST:
       case LOAD_HASHTAG_POSTS_REQUEST:
       case LOAD_USER_POSTS_REQUEST: {
+        /*
         if (!action.lastId) {
           draft.mainPosts = [];
           draft.hasMorePost = true;
         }
+        */
+        draft.mainPosts = !action.lastId ? [] : draft.mainPosts;
+        draft.hasMorePost = action.lastId ? draft.hasMorePost : true;
         break;
       }
       case LOAD_MAIN_POSTS_SUCCESS:

@@ -69,7 +69,7 @@ function* loadMainPosts(action) {
 }
 function* watchLoadMainPosts() {
   // throttle 사용 시 한 번 호출되면 지정한 시간만큼은 더이상 호출하지 않는다
-  yield throttle(2000, LOAD_MAIN_POSTS_REQUEST, loadMainPosts);
+  yield takeLatest(LOAD_MAIN_POSTS_REQUEST, loadMainPosts);
 }
 
 function loadHashtagPostsAPI(tag, lastId = 0, limit = 10) {
@@ -95,7 +95,7 @@ function* loadHashtagPosts(action) {
   }
 }
 function* watchLoadHashtagPosts() {
-  yield throttle(2000, LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
+  yield takeLatest(LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
 }
 
 function loadUserPostsAPI(id, lastId = 0, limit = 10) {

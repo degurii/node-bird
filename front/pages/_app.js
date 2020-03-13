@@ -1,5 +1,6 @@
 import React from 'react';
-import Head from 'next/head';
+// 당신의 Head, Helmet으로 대체되었다
+//import Head from 'next/head';
 import PropTypes from 'prop-types';
 // next와 redux를 함께 쓸 때 필요함
 import withRedux from 'next-redux-wrapper';
@@ -9,6 +10,8 @@ import { createStore, compose, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
 import axios from 'axios';
+import Helmet from 'react-helmet';
+import { Container } from 'next/app';
 
 import AppLayout from '../components/AppLayout';
 import reducer from '../reducers';
@@ -17,31 +20,93 @@ import { LOAD_USER_REQUEST } from '../reducers/user';
 
 const NodeBird = ({ Component, store, pageProps }) => {
   return (
-    // redux를 쓰려면 일케 해야함. store는 state, action, dispatch가 합쳐진거라고 생각하자
-    <Provider store={store}>
-      <Head>
-        <title>NodeBird</title>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css"
+    // 얘는 Helmet 쓰고 SSR적용할떄 감싼다
+    <Container>
+      {/* redux를 쓰려면 일케 해야함. store는 state, action, dispatch가
+      합쳐진거라고 생각하자*/}
+      <Provider store={store}>
+        {/* <Head> 태그랑 Helmet의 Head랑 충돌하기 때문에 Helmet으로 바꿔준다 */}
+        <Helmet
+          title="NodeBird"
+          htmlAttributes={{ lang: 'ko' }}
+          meta={[
+            {
+              charset: 'UTF-8',
+            },
+            {
+              name: 'viewport',
+              content:
+                'width=device-width,initial-scale=1.0,minimum-scale=1.0,maximul-scale=1.0,user-scalable=yes,viewport-fit=cover',
+            },
+            {
+              'http-equiv': 'X-UA-Compatible',
+              content: 'IE=edge',
+            },
+            {
+              name: 'description',
+              content: '데구리의 NodeBird SNS',
+            },
+            { name: 'og:title', content: 'NodeBird' },
+            {
+              name: 'og:description',
+              content: '데구리의 NodeBirs SNS',
+            },
+            {
+              property: 'og:type',
+              content: 'website',
+            },
+          ]}
+          link={[
+            {
+              rel: 'stylesheet',
+              href:
+                'https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css',
+            },
+            {
+              rel: 'stylesheet',
+              type: 'text/css',
+              href:
+                'https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css',
+            },
+            {
+              rel: 'stylesheet',
+              type: 'text/css',
+              href:
+                'https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css',
+            },
+          ]}
+          script={[
+            {
+              src: 'https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.js',
+            },
+          ]}
         />
-        >
-        <link
-          rel="stylesheet"
-          type="text/css"
-          charset="UTF-8"
-          href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css"
-        />
-        <link
-          rel="stylesheet"
-          type="text/css"
-          href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css"
-        />
-      </Head>
-      <AppLayout>
-        <Component {...pageProps} />
-      </AppLayout>
-    </Provider>
+        {/*
+        <Head>
+          <title>NodeBird</title>
+          <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css"
+          />
+          >
+          <link
+            rel="stylesheet"
+            type="text/css"
+            charset="UTF-8"
+            href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css"
+          />
+          <link
+            rel="stylesheet"
+            type="text/css"
+            href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css"
+          />
+        </Head>
+        */}
+        <AppLayout>
+          <Component {...pageProps} />
+        </AppLayout>
+      </Provider>
+    </Container>
   );
 };
 
@@ -80,6 +145,7 @@ NodeBird.getInitialProps = async context => {
     });
   }
 
+  // _app.js 안에서 쓰는 component들을 호출해주는 부분
   if (Component.getInitialProps) {
     pageProps = await Component.getInitialProps(ctx);
   }

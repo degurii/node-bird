@@ -35,7 +35,7 @@ const Home = () => {
     ) {
       if (hasMorePost) {
         // 현재까지 로드한 가장 아래 글(글은 생성시간, id의 역순)의 id보다 id가 작은 친구들을 더 로드한다
-        const lastId = mainPosts[mainPosts.length - 1].id;
+        const lastId = mainPosts.length && mainPosts[mainPosts.length - 1].id;
         if (!lastIdList.current.includes(lastId)) {
           dispatch({
             type: LOAD_MAIN_POSTS_REQUEST,
@@ -67,7 +67,7 @@ Home.getInitialProps = async context => {
   // console.log(Object.keys(context));
   // 위 콘솔 로그를 실행하면 context 내용물이 보이는데,
   // store에 dispatch, getState가 있다. getState는 리덕스 state를 불러오는 함수
-  console.log(context.store);
+  //console.log(context.store);
   context.store.dispatch({
     type: LOAD_MAIN_POSTS_REQUEST,
   });
