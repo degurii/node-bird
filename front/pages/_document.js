@@ -5,6 +5,8 @@ import React from 'react';
 import Document, { Main, NextScript } from 'next/document';
 import Helmet from 'react-helmet';
 import PropTypes from 'prop-types';
+// styled component도 SSR을 해줘야 한다
+import { ServerStyleSheet } from 'styled-components';
 
 class MyDocument extends Document {
   static getInitialProps(context) {
@@ -14,9 +16,14 @@ class MyDocument extends Document {
     // document -> 렌더링 -> app.js -> (Component.getInitialProps) -> 하위 컴포넌트로
     // page를 딱히 쓰진 않는데 나중에 console.log 찍어보고 필요한거 같으면 써라
     // this.props.page에 담겨있다
-    const page = context.renderPage(App => props => <App {...props} />);
 
-    return { ...page, helmet: Helmet.renderStatic() };
+    const sheet = new ServerStyleSheet();
+    const page = context.renderPage(App => props =>
+      sheet.collectStyles(<App {...props} />)
+    );
+    const styleTags = sheet.getStyleElement();
+
+    return { ...page, helmet: Helmet.renderStatic(), styleTags };
   }
 
   render() {
@@ -27,7 +34,10 @@ class MyDocument extends Document {
 
     return (
       <html {...htmlAttrs}>
-        <head>{Object.values(helmet).map(el => el.toComponent())}</head>
+        <head>
+          {this.props.styleTags}
+          {Object.values(helmet).map(el => el.toComponent())}
+        </head>
         <body {...bodyAttrs}>
           <Main />
           <NextScript />
@@ -39,5 +49,6 @@ class MyDocument extends Document {
 
 MyDocument.propTypes = {
   helmet: PropTypes.object.isRequired,
+  styleTags: PropTypes.object.isRequired,
 };
 export default MyDocument;

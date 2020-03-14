@@ -1,8 +1,8 @@
 import React, { useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import PostForm from '../components/PostForm';
-import PostCard from '../components/PostCard';
+import PostForm from '../containers/PostForm';
+import PostCard from '../containers/PostCard';
 import { LOAD_MAIN_POSTS_REQUEST } from '../reducers/post';
 //import { loginAction, logoutAction } from '../reducers/user';
 /*
@@ -57,7 +57,7 @@ const Home = () => {
     <div>
       {me && <PostForm />}
       {mainPosts.map(post => (
-        <PostCard key={post.createdAt} post={post} />
+        <PostCard key={post.id} post={post} />
       ))}
     </div>
   );

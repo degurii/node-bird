@@ -25,7 +25,9 @@ const NodeBird = ({ Component, store, pageProps }) => {
       {/* redux를 쓰려면 일케 해야함. store는 state, action, dispatch가
       합쳐진거라고 생각하자*/}
       <Provider store={store}>
-        {/* <Head> 태그랑 Helmet의 Head랑 충돌하기 때문에 Helmet으로 바꿔준다 */}
+        {/* <Head> 태그랑 Helmet의 Head랑 충돌하기 때문에 Helmet으로 바꿔준다 
+            Helmet을 SSR해야함
+        */}
         <Helmet
           title="NodeBird"
           htmlAttributes={{ lang: 'ko' }}
@@ -36,7 +38,7 @@ const NodeBird = ({ Component, store, pageProps }) => {
             {
               name: 'viewport',
               content:
-                'width=device-width,initial-scale=1.0,minimum-scale=1.0,maximul-scale=1.0,user-scalable=yes,viewport-fit=cover',
+                'width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=yes,viewport-fit=cover',
             },
             {
               'http-equiv': 'X-UA-Compatible',
@@ -58,19 +60,21 @@ const NodeBird = ({ Component, store, pageProps }) => {
           ]}
           link={[
             {
+              rel: 'shortcut icon',
+              href: '/favicon.ico',
+            },
+            {
               rel: 'stylesheet',
               href:
                 'https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css',
             },
             {
               rel: 'stylesheet',
-              type: 'text/css',
               href:
                 'https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css',
             },
             {
               rel: 'stylesheet',
-              type: 'text/css',
               href:
                 'https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css',
             },
@@ -147,7 +151,7 @@ NodeBird.getInitialProps = async context => {
 
   // _app.js 안에서 쓰는 component들을 호출해주는 부분
   if (Component.getInitialProps) {
-    pageProps = await Component.getInitialProps(ctx);
+    pageProps = (await Component.getInitialProps(ctx)) || {};
   }
   return { pageProps };
 };
@@ -159,7 +163,7 @@ const configureStore = (initialState, options) => {
   // 다음처럼 커스텀 미들웨어도 만들 수 있다
   // store => next => action => {} 꼴의 3단 currying 함수를 만들면 됨
   const logActionMiddleware = store => next => action => {
-    console.log(action);
+    // console.log(action);
     next(action);
   };
   const middlewares = [sagaMiddleware];

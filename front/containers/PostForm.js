@@ -43,7 +43,7 @@ const PostForm = () => {
   // 이미지와 글을 한 번에 서버로 보내면 편하지만,
   // 이미지는 업로드하는 비용이 크기때문에 따로 처리한다
   const onChangeImages = useCallback(e => {
-    console.log(e.target.files);
+    // console.log(e.target.files);
     // 원래 multipart/form-data 하고 서브밋하면 폼 데이터가 서버로 전송되는데
     // 폼데이터를 바로 서버로 보내는 게 아니라 ajax로 보내기 때문에
     // 일일이 이미지를 어펜드 해줘야함

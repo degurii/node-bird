@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { LOAD_HASHTAG_POSTS_REQUEST } from '../reducers/post';
-import PostCard from '../components/PostCard';
+import PostCard from '../containers/PostCard';
 
 const Hashtag = ({ tag }) => {
   const { mainPosts, hasMorePost } = useSelector(state => state.post);
@@ -37,7 +37,8 @@ const Hashtag = ({ tag }) => {
   }, [hasMorePost, mainPosts, tag]);
   return (
     <div>
-      {mainPosts && mainPosts.map(c => <PostCard key={c.createdAt} post={c} />)}
+      {mainPosts &&
+        mainPosts.map(post => <PostCard key={post.id} post={post} />)}
     </div>
   );
 };
@@ -51,8 +52,8 @@ Hashtag.propTypes = {
 // 그래서 안에 서버쪽 코드를 넣어주면 됨
 Hashtag.getInitialProps = async context => {
   const tag = context.query.tag;
-  //console.log('hashtag getInitialProps', tag);
-  console.log('hashtag - 겟 이니셜 프롭쓰 dispatch 실행');
+  // console.log('hashtag getInitialProps', tag);
+  // console.log('hashtag - 겟 이니셜 프롭쓰 dispatch 실행');
   context.store.dispatch({
     type: LOAD_HASHTAG_POSTS_REQUEST,
     data: tag,

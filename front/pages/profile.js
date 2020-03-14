@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import { List, Button, Card, Icon } from 'antd';
 
-import NicknameEditForm from '../components/NicknameEditForm';
-import PostCard from '../components/PostCard';
+import NicknameEditForm from '../containers/NicknameEditForm';
+import PostCard from '../containers/PostCard';
 import {
   LOAD_FOLLOWERS_REQUEST,
   LOAD_FOLLOWINGS_REQUEST,

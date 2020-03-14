@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { LOAD_USER_POSTS_REQUEST } from '../reducers/post';
+import { LOAD_ssef_POSTS_REQUEST } from '../reducers/post';
 import PostCard from '../components/PostCard';
 import { Avatar, Card } from 'antd';
 import { LOAD_USER_REQUEST } from '../reducers/user';
@@ -55,14 +55,14 @@ User.getInitialProps = async context => {
   // 우리는 프론트엔드 비동기 호출은 모두 redux-saga에서 처리
   // 그러니까 SSR을 위해 여기서 redux action을 dispatch해주면 된다
   const id = parseInt(context.query.id, 10);
-  console.log('user getInitialProps', id);
+  // console.log('user getInitialProps', id);
   const state = context.store.getState();
   context.store.dispatch({
     type: LOAD_USER_REQUEST,
     data: id,
   });
   context.store.dispatch({
-    type: LOAD_USER_POSTS_REQUEST,
+    type: LOAD_ssef_POSTS_REQUEST,
     data: id,
   });
 
