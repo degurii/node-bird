@@ -14,6 +14,7 @@ import Helmet from 'react-helmet';
 import { Container } from 'next/app';
 
 import AppLayout from '../components/AppLayout';
+
 import reducer from '../reducers';
 import rootSaga from '../sagas';
 import { LOAD_USER_REQUEST } from '../reducers/user';
@@ -163,7 +164,7 @@ const configureStore = (initialState, options) => {
   // 다음처럼 커스텀 미들웨어도 만들 수 있다
   // store => next => action => {} 꼴의 3단 currying 함수를 만들면 됨
   const logActionMiddleware = store => next => action => {
-    // console.log(action);
+    console.log(action);
     next(action);
   };
   const middlewares = [sagaMiddleware];

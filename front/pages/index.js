@@ -1,9 +1,13 @@
 import React, { useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+// Containers, Components
 import PostForm from '../containers/PostForm';
 import PostCard from '../containers/PostCard';
+
+// redux 관련
 import { LOAD_MAIN_POSTS_REQUEST } from '../reducers/post';
+
 //import { loginAction, logoutAction } from '../reducers/user';
 /*
 // Hooks를 지원 안했을때 High-order Component를 이용해서 사용했던 방법

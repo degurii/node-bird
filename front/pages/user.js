@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { useDispatch, useSelector } from 'react-redux';
-import { LOAD_ssef_POSTS_REQUEST } from '../reducers/post';
-import PostCard from '../components/PostCard';
+import { useSelector } from 'react-redux';
+import { LOAD_USER_POSTS_REQUEST } from '../reducers/post';
 import { Avatar, Card } from 'antd';
+
+import PostCard from '../containers/PostCard';
+
 import { LOAD_USER_REQUEST } from '../reducers/user';
 
 const User = () => {
@@ -62,7 +64,7 @@ User.getInitialProps = async context => {
     data: id,
   });
   context.store.dispatch({
-    type: LOAD_ssef_POSTS_REQUEST,
+    type: LOAD_USER_POSTS_REQUEST,
     data: id,
   });
 

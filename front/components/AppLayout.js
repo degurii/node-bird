@@ -1,11 +1,22 @@
 import React, { useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
-import { Menu, Input, Row, Col, Button } from 'antd';
+import { Menu, Input, Row, Col, Affix } from 'antd';
 import LoginForm from '../containers/LoginForm';
 import UserProfile from '../containers/UserProfile';
 import { useSelector } from 'react-redux';
 import Router from 'next/router';
+import styled from 'styled-components';
+
+const MenuStyled = styled(Menu)`
+  z-index: 10;
+  width: 100%;
+  height: 66px;
+  display: flex;
+  align-items: center;
+
+`;
+
 
 const AppLayout = ({ children }) => {
   const { me } = useSelector(state => state.user);
@@ -22,34 +33,34 @@ const AppLayout = ({ children }) => {
   };
   return (
     <div>
-      <Menu mode="horizontal">
-        <Menu.Item key="home">
-          <Link href="/">
-            <a>노드 버드</a>
-          </Link>
-        </Menu.Item>
-        {me && [
-          <Menu.Item key="profile">
-            {/* Link에 prefetch를 달아두면 next에서 prefetch가 담긴 페이지를 불러올 떄 
+      <Affix>
+        <MenuStyled mode="horizontal">
+          <Menu.Item key="home">
+            <Link href="/">
+              <a>노드 버드</a>
+            </Link>
+          </Menu.Item>
+          {me && [
+            <Menu.Item key="profile">
+              {/* Link에 prefetch를 달아두면 next에서 prefetch가 담긴 페이지를 불러올 떄 
                 해당 데이터도 같이 불러옴. 
                 물론 prefetch를 남발하면 code spliting한 의미가 없다
                 그리고 개발환경에선 확인하기 힘들고 배포 환경에서 차이가 난다
             */}
-            <Link href="/profile" prefetch>
-              <a>프로필</a>
-            </Link>
-          </Menu.Item>,
-          <Menu.Item key="mail">
-            <Input.Search
-              enterButton
-              onSearch={onSearch}
-              placeholder="hashtag"
-              style={{ verticalAlign: 'middle' }}
-            />
-          </Menu.Item>,
-        ]}
-      </Menu>
-
+              <Link href="/profile" prefetch>
+                <a>프로필</a>
+              </Link>
+            </Menu.Item>,
+            <Menu.Item key="mail">
+              <Input.Search
+                enterButton
+                onSearch={onSearch}
+                placeholder="hashtag"
+              />
+            </Menu.Item>,
+          ]}
+        </MenuStyled>
+      </Affix>
       <Row gutter={12}>
         <Col xs={24} md={6}>
           {me ? <UserProfile /> : <LoginForm />}

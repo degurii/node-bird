@@ -2,8 +2,11 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import Helmet from 'react-helmet';
+
+// Containers, Components
 import PostCard from '../containers/PostCard';
 
+// redux 관련
 import { LOAD_POST_REQUEST } from '../reducers/post';
 
 const Post = ({ id }) => {

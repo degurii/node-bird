@@ -95,7 +95,7 @@ function* loadHashtagPosts(action) {
   }
 }
 function* watchLoadHashtagPosts() {
-  yield takeLatest(LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
+  yield throttle(2000, LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
 }
 
 function loadUserPostsAPI(id, lastId = 0, limit = 10) {

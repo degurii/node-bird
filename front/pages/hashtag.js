@@ -2,8 +2,11 @@ import React, { useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { LOAD_HASHTAG_POSTS_REQUEST } from '../reducers/post';
+// Containers, Components
 import PostCard from '../containers/PostCard';
+
+// redux 관련
+import { LOAD_HASHTAG_POSTS_REQUEST } from '../reducers/post';
 
 const Hashtag = ({ tag }) => {
   const { mainPosts, hasMorePost } = useSelector(state => state.post);
@@ -27,14 +30,14 @@ const Hashtag = ({ tag }) => {
         lastIdList.current.push(lastId);
       }
     }
-  }, [hasMorePost, mainPosts, tag]);
+  }, [hasMorePost, mainPosts.length, tag]);
 
   useEffect(() => {
     window.addEventListener('scroll', onScroll);
     return () => {
       window.removeEventListener('scroll', onScroll);
     };
-  }, [hasMorePost, mainPosts, tag]);
+  }, [hasMorePost, mainPosts.length, tag]);
   return (
     <div>
       {mainPosts &&

@@ -1,15 +1,18 @@
 import React, { useCallback } from 'react';
 import { List, Button, Card, Icon } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
 
+// Containers, Components
 import NicknameEditForm from '../containers/NicknameEditForm';
 import PostCard from '../containers/PostCard';
+
+// redux 관련
 import {
   LOAD_FOLLOWERS_REQUEST,
   LOAD_FOLLOWINGS_REQUEST,
   UNFOLLOW_USER_REQUEST,
   REMOVE_FOLLOWER_REQUEST,
 } from '../reducers/user';
-import { useDispatch, useSelector } from 'react-redux';
 import { LOAD_USER_POSTS_REQUEST } from '../reducers/post';
 
 const Profile = () => {
@@ -52,6 +55,7 @@ const Profile = () => {
       offset: followerList.length,
     });
   }, [followerList]);
+
   return (
     <div>
       <NicknameEditForm />
